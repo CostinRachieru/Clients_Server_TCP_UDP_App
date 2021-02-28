@@ -1,0 +1,57 @@
+
+Name: Costin-Tudor Rachieru
+Group: 324CA
+				Homework 2 - Client - Server Aplication
+
+	First of all, my data base consists in 3 maps:
+		-> clients_map:
+			- this map cotains the id of a client(key) and it's tcp socket(value),
+		which is -1 if he's closed or a positive number if not.
+			- efficient search for a client's socket.
+		
+		-> topics:
+			- this map contains topic names(key) and a vector of pairs(value)
+		<client_id, needs SF>.
+			- efficient search to find if the topic exists (when getting a
+		message from UDP client)
+			- efficient search for the subscribers of a topic.
+			- if a topic has no subscribers it is deleted (memory optimisation).
+			- if a subscriber is offline i still keep him in topic's vector.
+		
+		-> sf_map:
+			- this map contains a client id(key) and it's pending messages(value)
+		stored in a vector.
+			- fast search if a client has pending messages.
+			- only searches when he comes back on and was previously stored
+		in data base.
+			- after he come back on the messages are sent and deleted (memory
+		optmisation).
+
+	Transmission via TCP
+		-> I made a very reliable TCP transmission between server and it's clients.
+			- each message have the first two bytes consisting in the message length.
+			- each sender puts the message length in the firs two bytes of the
+			message and verifies if all the message was sent.
+			- each receiver:
+				-> checks first two bytes of the message to know it's length.
+				-> verifies if the message was entirely received and if not
+			he waits for the other parts.
+				-> if he receives more than his wanted message he stores the
+			additional information about the next messages in another buffer.
+				-> he will always check if there are fragments of other messages
+			in the additional buffer and put them in his main buffer.
+			- very few additional data needed for the reliable transmission(only 2
+			bytes)
+
+	Server TCP/UDP
+		-> always check if an ID is already used and send an error message.
+		-> when the server closes it anounces all it's online clients.
+		-> a client can subscribe again at a topic and change it' SF parameter.
+
+	Client TCP
+		-> checks for misspeled words in the given commands.
+		-> will do nothing if the command given is not correct.
+
+	There are no memory leaks that I could find with valgrind.
+
+	PS: Sorry for the one hour delay.
